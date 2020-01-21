@@ -1,13 +1,21 @@
 <template>
-    <section>
-        <form action="">
+    <div>
+        <section>
             <input autofocus autocomplete="off" placeholder="name" v-model="statement.name">
             <input autofocus autocomplete="off" placeholder="type" v-model="statement.type">
             <input autocomplete="off" placeholder="amount" v-model="statement.amount">
             <input autocomplete="off" placeholder="amount_at" v-model="statement.amountAt">
             <button  @click="store" type="submit">Adicionar</button>
-        </form>
-    </section>
+        </section>
+        <section>
+            <div v-for="(statement, index) in statements" :key="statement.name">
+                <p>
+                    <span class="statement">{{ statement.name }}</span>
+                    <button @click="removeStatement(index)">Remover</button>
+                </p>
+            </div>
+        </section>
+    </div>
 </template>
 
 <script>
@@ -34,7 +42,16 @@ export default {
     methods: {
         store: function () {
             if (!this.statement.name) return;
-            this.statements.push(this.statement);
+            let data = Object.assign({}, this.statement);
+            this.statements.push(data);
+            this.statement.name = null;
+            this.statement.type = null;
+            this.statement.amount = null;
+            this.statement.amountAt = null;
+            this.saveStatements();
+        },
+        removeStatement (index) {
+            this.statements.splice(index, 1);
             this.saveStatements();
         },
         saveStatements: function () {
