@@ -6,14 +6,14 @@
 </template>
 
 <script>
-import Statement from './components/Statement.vue'
+import Statement from './components/Statement.vue';
 
 export default {
   name: 'app',
   components: {
     Statement,
   }
-}
+};
 </script>
 
 <style>

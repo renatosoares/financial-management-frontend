@@ -23,7 +23,7 @@ export default {
     name: 'Statement',
     props: {
     },
-    data: () => {
+    data: function () {
         return {
             statement: {
                 name: null,
@@ -31,27 +31,56 @@ export default {
                 amount: null,
                 amountAt: null,
             },
-            statements: [],
+            statementCollection: [],
             testPrint: ''
         };
     },
+    computed: {
+        statements: {
+            get: function () {
+                const self = this;
+
+                return self.statementCollection;
+            },
+            set: function (newValue) {
+                const self = this;
+
+                self.statementCollection.push(newValue);
+            }
+        }
+    },
+    watch: {
+
+    },
     methods: {
-        store: function () {
+        store () {
+            const self = this;
+
             if (!this.statement.name) return;
+
             let data = Object.assign({}, this.statement);
-            this.statements.push(data);
-            this.statement.name = null;
-            this.statement.type = null;
-            this.statement.amount = null;
-            this.statement.amountAt = null;
-            this.repository().storageLocal.save('statements', this.statements);
+
+            self.statements = data;
+            self.statement.name = null;
+            self.statement.type = null;
+            self.statement.amount = null;
+            self.statement.amountAt = null;
+
+            self.repository().storageLocal.save('statements', this.statements);
         },
         destroy (index) {
             this.statements.splice(index, 1);
             this.repository().storageLocal.save('statements', this.statements);
         },
         index () {
-            this.statements = this.repository().storageLocal.list('statements');
+            const self = this;
+
+            self.repository()
+                .storageLocal
+                .list('statements')
+                .forEach(function (element) {
+                    self.statements = element;
+                });
         },
         repository () {
             const storageLocal = {
