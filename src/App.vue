@@ -1,17 +1,17 @@
 <template>
   <div id="app">
     <img alt="Vue logo" src="./assets/logo.png">
-    <Statement></Statement>
+    <statement-home></statement-home>
   </div>
 </template>
 
 <script lang="ts">
 import { Component, Vue } from 'vue-property-decorator';
-import Statement from './components/Statement.vue';
+import StatementHome from './components/StatementHome.vue';
 
 @Component({
   components: {
-    Statement,
+    StatementHome,
   },
 })
 export default class App extends Vue {}
