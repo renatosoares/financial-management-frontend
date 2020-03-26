@@ -13,7 +13,8 @@ import StatementHome from './components/StatementHome.vue';
   components: {
     StatementHome,
   },
-})
+});
+
 export default class App extends Vue {}
 </script>
 
