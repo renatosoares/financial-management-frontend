@@ -1,9 +1,8 @@
 <template>
   <div>
-          <!-- <div>
         <section>
             <input autofocus autocomplete="off" placeholder="name" v-model="statement.name">
-            <input autofocus autocomplete="off" placeholder="type" v-model="statement.type">
+            <input autocomplete="off" placeholder="type" v-model="statement.type">
             <input autocomplete="off" placeholder="amount" v-model="statement.amount">
             <input autocomplete="off" placeholder="amount_at" v-model="statement.amountAt">
             <button  @click="store()" type="submit">Adicionar</button>
@@ -16,9 +15,6 @@
                 </p>
             </div>
         </section>
-    </div> -->
-      <section>section1</section>
-      <section>section2</section>
   </div>
 </template>
 
@@ -32,18 +28,18 @@ interface StatementInterface {
     amountAt: string|null;
 }
 
-interface StorageLocalRepositoryInterface {
-    save(key: string, value: Array<StatementInterface>): void;
-    update(key: string, value: Array<StatementInterface>): void;
-    all(): Array<StatementInterface>;
-    find(key: string): StatementInterface;
+interface RepositoryInterface {
+    save(value: Array<StatementInterface>): void;
+    update(index: number, value: Array<StatementInterface>): void;
+    all(): Statement[]|undefined;
+    find(index: number): StatementInterface;
 }
 
 class Statement implements StatementInterface {
-    name: string|null;
-    type: string|null;
-    amount: string|null;
-    amountAt: string|null;
+    public name: string|null;
+    public type: string|null;
+    public amount: string|null;
+    public amountAt: string|null;
 
     constructor() {
         this.name = null;
@@ -51,96 +47,120 @@ class Statement implements StatementInterface {
         this.amount = null;
         this.amountAt = null;
     }
+
+    public clear(): void {
+        this.name = null;
+        this.type = null;
+        this.amount = null;
+        this.amountAt = null;
+    }
 }
 
-class StorageLocal implements StorageLocalRepositoryInterface {
-    save(key: string, value: StatementInterface[]): void {
+class StorageLocal implements RepositoryInterface {
+    private _table: string;
+
+    constructor(table: string) {
+        this._table = table;
+    }
+
+    public get table(): string {
+        return this._table;
+    }
+
+    public set table(table: string) {
+        this._table = table;
+    }
+
+    save(value: Statement[]): void {
         const parsed = JSON.stringify(value);
-        localStorage.setItem(key, parsed);
+        localStorage.setItem(this.table, parsed);
     }
 
-    update(key: string,value: StatementInterface[]): void {
+    update(index: number,value: StatementInterface[]): void {
         // TODO
         throw new Error("Method not implemented.");
     }
 
-    all(): StatementInterface[] {
-        // TODO
-        throw new Error("Method not implemented.");
+    all(): Statement[] {
+        const statement = new Statement();
+        let data = [statement];
+
+        try {
+            const item = localStorage.getItem(this.table);
+            if (item) {
+                data = JSON.parse(item) || [statement];
+                return data;
+            }
+        } catch (error) {
+            localStorage.removeItem(this.table);
+            return data;
+        }
+
+        return data;
     }
 
-    find(key: string): StatementInterface {
-        throw new Error("Method not implemented.");
+    find(index: number): StatementInterface {
         // TODO
-        // if (localStorage.getItem(key)) {
-        //     try {
-        //         return JSON.parse(localStorage.getItem(key));
-        //     } catch (error) {
-        //         localStorage.removeItem(key);
-        //         return [];
-        //     }
-        // }
+        throw new Error("Method not implemented.");
     }
 }
 
 @Component
 export default class StatementHome extends Vue {
-    private statement: Statement;
+    public statement: Statement;
 
-    private statementCollection: Array<object>;
+    private statementCollection: Statement[];
+
+    private storageLocal: StorageLocal;
 
     constructor() {
         super();
 
         this.statement = new Statement();
         this.statementCollection = [];
+        this.storageLocal = new StorageLocal('statements');
     }
 
-    get statements(): Array<object> {
+    get statements(): Statement[] {
         return this.statementCollection;
     }
-    set statements(newValue: Array<object>) {
-        this.statementCollection.push(newValue);
+    set statements(newValue: Statement[]) {
+        const statement: Statement = Object.assign(new Statement(), newValue.pop());
+
+        this.statementCollection.push(statement);
     }
 
     @Watch('statement', {
         deep: true,
     })
-    statementChanged(newVal: object, oldVal: object) {
+    statementChanged(newVal: Statement, oldVal: Statement) {
         // TODO
     }
 
     public store(): void {
         if (!this.statement.name) return;
-        const storageLocal = new StorageLocal();
-        const data = Object.assign(new Statement(), this.statement);
+        const data = [Object.assign(new Statement(), this.statement)];
 
-        this.statements = [data];
+        this.statements = data;
 
-        this.statement.name = null;
-        this.statement.type = null;
-        this.statement.amount = null;
-        this.statement.amountAt = null;
+        this.statement.clear();
 
-        storageLocal.save('statements', this.statements);
+        this.storageLocal.save(this.statements);
     }
 
     public destroy(index: number): void {
         // TODO
-        // this.statements.splice(index, 1);
-        // this.repository().storageLocal.save('statements', this.statements);
+
+        this.statements.splice(index, 1);
+        this.storageLocal.save(this.statements);
     }
 
     public index(): void {
-        // TODO
-        // const self = this;
-
-        // self.repository()
-        //     .storageLocal
-        //     .list('statements')
-        //     .forEach(function (element) {
-        //         self.statements = element;
-        //     });
+        this.storageLocal
+            .all()
+            .forEach(element => {
+                this.statements = [element];
+            });
     }
 
     mounted() {
