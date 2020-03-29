@@ -12,6 +12,7 @@
                 <p>
                     <span class="statement">{{ statement.name }}</span>
                     <button @click="destroy(index)">Remover</button>
+                    <button @click="edit(index)">Editar</button>
                 </p>
             </div>
         </section>
@@ -29,10 +30,11 @@ interface StatementInterface {
 }
 
 interface RepositoryInterface {
+    all(): Statement[]|undefined;
+    destroy(index: number): void;
+    find(index: number): StatementInterface;
     save(value: Array<StatementInterface>): void;
     update(index: number, value: Array<StatementInterface>): void;
-    all(): Statement[]|undefined;
-    find(index: number): StatementInterface;
 }
 
 class Statement implements StatementInterface {
@@ -71,17 +73,17 @@ class StorageLocal implements RepositoryInterface {
         this._table = table;
     }
 
-    save(value: Statement[]): void {
+    public save(value: Statement[]): void {
         const parsed = JSON.stringify(value);
         localStorage.setItem(this.table, parsed);
     }
 
-    update(index: number,value: StatementInterface[]): void {
+    public update(index: number,value: StatementInterface[]): void {
         // TODO
         throw new Error("Method not implemented.");
     }
 
-    all(): Statement[] {
+    public all(): Statement[] {
         const statement = new Statement();
         let data = [statement];
 
@@ -99,7 +101,11 @@ class StorageLocal implements RepositoryInterface {
         return data;
     }
 
-    find(index: number): StatementInterface {
+    public destroy(index: number): void {
+        // TODO
+    }
+
+    public find(index: number): StatementInterface {
         // TODO
         throw new Error("Method not implemented.");
     }
@@ -149,8 +155,6 @@ export default class StatementHome extends Vue {
     }
 
     public destroy(index: number): void {
-        // TODO
-
         this.statements.splice(index, 1);
         this.storageLocal.save(this.statements);
     }
@@ -161,6 +165,18 @@ export default class StatementHome extends Vue {
             .forEach(element => {
                 this.statements = [element];
             });
+    }
+
+    public edit(index: number): void {
+        // FIXME editar no localStorage
+        this.statement = this.statements[index];
+        this.statements.splice(index, 1);
+        this.storageLocal.save(this.statements);
+
+    }
+
+    public show(index: number): void {
+        // TODO
     }
 
     mounted() {
