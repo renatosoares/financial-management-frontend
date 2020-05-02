@@ -1,6 +1,10 @@
-// base colors
-$dark: #202429;
+// vendor
+@import '~bootstrap';
 
-body {
-    background-color: $dark;
-}
+// setup
+@import './setup/variables';
+
+// basics
+@import './basics/base';
+
+
